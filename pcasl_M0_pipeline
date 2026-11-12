@@ -1,0 +1,41 @@
+%% Preprocessing
+% if M0 is embedded in pcasl scan
+fslroi XX_pcasl.nii.gz XX_pcasl_M0.nii.gz 0 1
+fslroi XX_pcasl.nii.gx XX_pcasl_44.nii.gz 1 44
+
+bet2 xx_e2.nii.gz xx_e2_brain.nii.gz -f 0.35
+
+fsl_prepare_fieldmap SIEMENS e2_ph.nii e2_brain.nii fieldmap_rads.nii 2.46
+
+%% Main command
+
+oxford_asl -i /path/to/ASL.nii.gz \
+-o /path/to/output_directory(preexisting_folder_unnecessary) \
+--casl \
+--iaf=tc \
+--ibf=tis \
+--tis=3.6 \
+--bolus=1.8 \
+--slicedt=0.045 \
+--tr=10 \
+--mc \ 
+--spatial \
+--fslanat=/path/to/participant.anat \
+-c /path/to/M0.nii.gz \
+--cmethod=voxel \
+--alpha=0.85 \
+--bat=0.00 \
+--fixbolus \
+--fmap=/path/to/fieldmap_rads.nii.gz \
+--fmapmag=/path/to/fieldmap_magnitude.nii.gz \
+--fmapmagbrain=/path/to/fieldmap_magnitude_brain.nii.gz \
+--echospacing=0.00039999 \
+--pedir=-y \
+--region-analysis
+
+%% Data extraction for GM. WM and whole-brain (uses fsl_anat output)
+
+% GM=1, WM =2
+fslstats perfusion_calib.nii.gz -k T1_fast_pve_1.nii.gz -M
+fslstats perfusion_calib.nii.gz -k T1_fast_pve_2.nii.gz -M
+fslstats perfusion_calib.nii.gz -M
